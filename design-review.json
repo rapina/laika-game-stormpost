@@ -1,10 +1,10 @@
 {
   "schemaVersion": 3,
   "reviewedAt": "2026-07-26",
-  "sourceHash": "aff744bcee77793a3841c71748fb1af503bf29ff89e5c64471944dd642762a85",
-  "verdict": "blocked",
+  "sourceHash": "5528e1f6047d993038ca4461cc16413f0c06117ea353946c247656624acbd027",
+  "verdict": "pass",
   "method": {
-    "build": "production web build and immutable arcade release exercised through deployment smoke, CSP portal, and viewport harnesses",
+    "build": "Fresh npm run build:arcade output (dist-arcade), exercised in the Arcade CSP sandbox harness; standalone production build was also rebuilt",
     "viewport": {
       "width": 390,
       "height": 844
@@ -12,95 +12,126 @@
   },
   "designConformance": [
     {
-      "id": "contracts-and-flight-loop",
-      "designClaim": "The run presents coral, azure, and gold contracts, supports free-route steering, drops the nearest pending letter on release, opens the gate after all three deliveries, and ends on gate return, zero hull, or timeout.",
+      "id": "flight-input-and-gust",
+      "designClaim": "Pointer drag steers, release drops the nearest pending letter, and an unmoved tap shorter than 180ms spends one of up to three gust charges before drop, pushing nearby hazards and briefly protecting the hull; keyboard steering, drop, gust, pause, and mute controls are also provided.",
       "status": "implemented",
-      "observed": "The production runtime creates three differently sealed pending letters and matching islands, steers toward pointer or keyboard targets, resolves release drops against the nearest pending destination, gates return on all three delivered flags, and has success, hull-loss, and 360-second timeout endings."
+      "observed": "The production runtime maps the pointer into the 390×844 design space, steers toward held pointer/keyboard targets, branches pointer-up at 180ms with short tap taking the gust path, spends a charge, grants 0.7s protection and displaces hazards within 130px. Space, Shift, arrows/WASD, P, and M are bound as specified, and the intro/HUD presents the same controls."
     },
     {
-      "id": "pointer-and-keyboard-controls",
-      "designClaim": "Drag steers, release drops, taps of at most 180 ms spend gust before dropping, and keyboard controls provide arrows/WASD, Space, Shift, P, and M.",
+      "id": "altitude-updraft-and-hull",
+      "designClaim": "Altitude starts at 76, drains by 2.8 per second outside lift, restores by 22 per second in lift, is shown in an ALT bar, and at zero costs one of four hull points before resetting to 28; another altitude impact is armed only after altitude exceeds 35.",
       "status": "implemented",
-      "observed": "The built runtime distinguishes unmoved presses shorter than 180 ms from drag releases; the short path invokes gust while the other invokes drop. Keyboard handlers implement the promised steering, drop, gust, pause, and mute keys."
+      "observed": "The runtime initializes altitude 76 and hull 4, applies the tested altitudeAfter rates and 0–100 bounds, renders the ALT value/bar with a low-altitude warning, applies a hull hit at zero, resets altitude to 28, and re-arms only above 35."
     },
     {
-      "id": "delivery-radius-and-score",
-      "designClaim": "Drops succeed within 42 px, are precise within 20 px, and score 1,000 base plus 400 precision and 250 dry bonuses under a x1.0, x1.5, x2.0 success multiplier that resets on a miss.",
+      "id": "updraft-gust-storage",
+      "designClaim": "Remaining in an updraft restores altitude and charges gust storage up to three, with one gust available at departure.",
       "status": "implemented",
-      "observed": "Runtime delivery uses the 42 px cutoff, 20 px precision threshold, dry bonus, capped three-step multiplier, and resets combo on both missed drops and damage; the creator test asserts representative boundary and score results."
+      "observed": "A circular lift check drives both altitude recovery and a 2.5-second charge accumulator; each completed charge adds a gust up to three, while initial and restarted runs begin with one."
     },
     {
-      "id": "return-score-grade-and-phase",
-      "designClaim": "Final score adds 8 points per remaining second and 250 per remaining hull; grades are S at 5,200, A at 4,200, B at 3,000, otherwise C, with distress D; GameResult.phase is delivered count 0-3.",
+      "id": "hazards-letter-wetness",
+      "designClaim": "Birds and active lightning clouds damage the hull by one, grant 1.2 seconds of invulnerability, and wet the first undelivered dry letter; lightning cycles through a 1-second warning, 0.65-second active interval, then cooldown.",
       "status": "implemented",
-      "observed": "The finish path applies floored remaining seconds and hull bonuses, uses the stated grade boundaries with forced D for distress, and emits the delivered-letter count as phase."
+      "observed": "Collision uses hazard and 17px ship radii, gates cloud damage to lightningPhase(active), subtracts one hull, sets 1.2s invulnerability, resets combo and applies wetFirstPending. The phase helper and renderer implement warning below 1.0s, active through 1.65s, and cooldown for the remainder of the four-second cycle."
     },
     {
-      "id": "hull-altitude-and-wet-letters",
-      "designClaim": "The ship starts with four hull, hazards remove one hull and grant 1.2 seconds immunity, altitude starts at 76, drains at 2.8/s, restores at 22/s in lift, and at zero costs one hull before restoring to 28 and rearming only above 35; collision wets the first pending letter.",
+      "id": "delivery-scoring-and-combo",
+      "designClaim": "A matching mailbox drop succeeds within 42px and is precise within 20px; it awards 1,000 base, 400 precise, 250 dry, multiplied by the ×1.0/×1.5/×2.0 success chain, while a miss resets the chain.",
       "status": "implemented",
-      "observed": "The runtime constants and update path match all promised hull, immunity, altitude, recovery, rearm, and first-pending-letter wet-state values; ALT is rendered in the HUD."
+      "observed": "Drop selects the nearest undelivered letter/island pair, rejects distance over 42, calls the tested deliveryScore calculation, advances combo to a maximum of two steps, and resets combo on a miss. HUD and delivery messages expose score and multiplier."
     },
     {
-      "id": "gust-resource",
-      "designClaim": "Gust starts at one, caps at three, charges while staying in an updraft, pushes nearby hazards, and briefly protects the hull when spent.",
+      "id": "urgent-gold-contract",
+      "designClaim": "The gold urgent contract adds 900 points when delivered before the last slot and 500 when delivered last.",
       "status": "implemented",
-      "observed": "The production runtime starts gust at 1, adds a charge after 2.5 seconds accumulated in lift up to 3, pushes hazards within 130 px, and grants 0.7 seconds of ship immunity."
+      "observed": "Gold delivery checks the count already delivered and adds 900 when fewer than two are complete, otherwise 500 when it is the third delivery."
     },
     {
-      "id": "gold-express-bonus",
-      "designClaim": "The gold emergency contract awards 900 points when delivered first or second and 500 points when delivered last.",
+      "id": "gate-success-and-failure",
+      "designClaim": "The storm gate remains locked until all three differently colored contracts are delivered; flying through it ends in return, while zero hull or the six-minute limit ends in distress.",
       "status": "implemented",
-      "observed": "Gold delivery checks the number already delivered and adds 900 below two or 500 when two contracts have already been completed."
+      "observed": "The tested gate predicate requires exactly three delivered letters. The runtime renders locked/open gate states, finishes successfully only after that predicate and entering the top gate area, and finishes unsuccessfully at hull zero or 360 elapsed seconds."
+    },
+    {
+      "id": "final-score-grade-and-phase",
+      "designClaim": "Final score adds 8 points per whole remaining second and 250 per remaining hull point; successful grades are S at 5,200, A at 4,200, B at 3,000, otherwise C, distress is D, and GameResult.phase is the delivered count from zero to three.",
+      "status": "implemented",
+      "observed": "The tested finalScore and grade helpers implement the stated bonuses and thresholds. finish sends the computed total and the filtered delivered-letter count to the host and renders the grade, score, delivery count, and hull in the result panel."
+    },
+    {
+      "id": "seeded-route-and-safe-corridor",
+      "designClaim": "The seed drives three differently colored island positions, lift position, and hazards; a 76px-wide vertical corridor joining the lift is kept clear of the full hazard collision shapes plus the ship's 17px radius during placement and movement.",
+      "status": "implemented",
+      "observed": "Production route generation uses the seeded logic RNG for islands, lift and hazard placement. placeOutsideCorridor enforces half-width 38 + hazard radius + ship radius 17 initially and after every hazard movement step, reflecting horizontal velocity at the boundary. The creator test rechecked this invariant over 200 seeds, both hazard kinds, 30 hazards and 120 movement steps each."
+    },
+    {
+      "id": "route-motion-and-weather",
+      "designClaim": "Cloud layers scroll to convey forward travel, hazards flow downward and recycle above the screen, birds cross horizontally, and rain, lightning, feathers/weather forms are composed in procedural Canvas 2D.",
+      "status": "implemented",
+      "observed": "The rebuilt production canvas showed animated scrolling cloud layers, rain, islands, lift, gate, ship and hazards. Runtime updates move hazards downward and recycle them at the top, give seeded horizontal velocity to bird/cloud hazards, and draw bird flocks and phased lightning procedurally."
     },
     {
       "id": "stamps-and-cosmetics",
-      "designClaim": "Each completed run accumulates one stamp per 1,000 final-score points and unlocks cosmetic-only hull, sail, and gust-ring appearances at 4, 9, and 15, retaining run-local progress if sandbox storage is unavailable.",
+      "designClaim": "Each 1,000 final-score points awards one locally accumulated stamp, unlocking bright hull at four, teal sail at nine, and a gold gust ring at fifteen without changing performance; storage-denied sandboxes retain the current-run total.",
       "status": "implemented",
-      "observed": "The finish path floors score/1,000 into stamps, catches storage failure while retaining the in-memory total, and rendering selects the three cosmetic tiers without changing gameplay values."
+      "observed": "The tested stampReward/cosmeticTier helpers implement floor(score/1000) and thresholds 4/9/15. The runtime reads and writes the prefixed local total inside try/catch, keeps its in-memory total if writes fail, and drawShip changes only fill/stroke appearance by tier."
     },
     {
-      "id": "seeded-route-and-hazard-cycles",
-      "designClaim": "The seed varies the horizontal positions of three distinct-color islands, the updraft, and hazards; hazards flow downward and recycle, birds cross horizontally, and lightning cycles through 1.0-second warning, 0.65-second active damage, then cooldown.",
+      "id": "locales-pause-audio-and-haptics",
+      "designClaim": "Korean and English provide the same game rule and state information; document deactivation pauses automatically; WebAudio starts only after first user input and supplies wind, sail, gust, hit, delivery and gate sounds, with supported haptics used briefly.",
       "status": "implemented",
-      "observed": "Seeded logic creates coral, azure, and gold islands plus a seeded lift and hazards. Hazards advance downward and wrap, birds have horizontal velocity, and the four-second lightning phase function uses warning before the 0.65-second active interval and damages only while active."
+      "observed": "Fresh viewport runs reached the result UI in Korean and English with no errors or clipping, while the canvas tables contain parallel control, status and result strings. visibilitychange pauses active play. AudioContext creation occurs only from pointer/keyboard unlock paths; wind panning and all specified event tones are wired, P/background/result suspend audio, M mutes, destroy closes it, and gameplay events call navigator.vibrate optionally."
     },
     {
-      "id": "safe-corridor",
-      "designClaim": "A 76 px-wide vertical safe corridor links the route, with every hazard's initial position and movement kept outside it so progression from start to gate is guaranteed.",
-      "status": "missing",
-      "observed": "The implementation constrains only each hazard center to be at least 38 px from the corridor center. Collision uses hazard radius plus 17 px ship radius; hazards have radii up to 31 px, so a hazard centered on the corridor boundary can still damage a ship inside the promised corridor. The creator invariant likewise checks center distance only, not collision clearance, so the 76 px hazard-free passage is not guaranteed."
-    },
-    {
-      "id": "pause-audio-haptics-and-locales",
-      "designClaim": "Visibility loss auto-pauses; WebAudio starts only after first input and supplies reactive wind and event tones; supported environments receive brief haptics; Korean and English expose the same rules and state information.",
+      "id": "portrait-production-layout",
+      "designClaim": "The game uses a 390×844 portrait Canvas 2D design and remains playable inside a uniformly letterboxed Arcade frame.",
       "status": "implemented",
-      "observed": "The built runtime pauses on document hiding, creates AudioContext only from pointer or M-key input, synthesizes wind and gust/hit/delivery/gate/sail events, calls optional vibration for game events, and renders equivalent Korean and English instruction and state paths. Locale parity tests pass."
-    },
-    {
-      "id": "no-monetization",
-      "designClaim": "The game has no banner or interstitial advertising and no IAP.",
-      "status": "implemented",
-      "observed": "The game and arcade runtime mount the flight canvas directly and do not invoke ad or purchase flows; the verified arcade release contains only its entry module, stylesheet, and three declared font assets."
+      "observed": "Fresh viewport verification measured the standalone canvas at exactly 390×844 CSS pixels with a 1560×3376 backing store at DPR 3. The Arcade-shaped 390×844 viewport produced a uniform 358.578125×776 canvas, remained fully inside the frame, had no page overflow or console/page errors, and the CSP harness mounted the release canvas at 390×844 with all required styles and assets."
     }
   ],
   "creatorTests": [
     {
       "command": "npm test",
-      "covers": "Delivery radius and scoring, wet-letter ordering, gate condition, final score and grades, seeded route bounds, lightning phases, stamp/cosmetic thresholds, altitude rates, hazard-center corridor invariant, RNG behavior, record persistence, and locale parity.",
+      "covers": "Creator-selected delivery radius and scoring, wet-letter order, gate predicate, final bonus and grade boundaries, seeded route bounds, lightning timing, stamp/cosmetic thresholds, altitude rates, full collision-shape corridor clearance, deterministic logic RNG, records, and locale key parity.",
+      "status": "pass"
+    },
+    {
+      "command": "npm run build",
+      "covers": "TypeScript validation and standalone production bundle generation.",
+      "status": "pass"
+    },
+    {
+      "command": "npm run build:arcade",
+      "covers": "Arcade TypeScript/bundle generation, immutable release manifest creation, hashes, declared fonts, entry module and release budget verification.",
+      "status": "pass"
+    },
+    {
+      "command": "npm run csp",
+      "covers": "Actual Arcade-style sandbox/CSP boot, stylesheet application, canvas layout, required asset responses, and absence of CSP, console, and page errors.",
+      "status": "pass"
+    },
+    {
+      "command": "npm run viewport",
+      "covers": "390×844 plus supported compact, large-phone and wide standalone/portal layouts, DPR backing store, uniform aspect, page overflow, and Korean/English game-over bounds.",
+      "status": "pass"
+    },
+    {
+      "command": "npm run smoke -- 17 90000",
+      "covers": "Current sequence deployment-only page mount and absence of console/page errors with seed 17.",
       "status": "pass"
     }
   ],
   "deployable": {
     "status": "pass",
-    "observed": "npm run build and npm run build:arcade passed; the immutable arcade release verified 5 files (1,618,433 bytes, 92,826-byte JS gzip). Deployment smoke mounted with no console or page errors and sourceHash aff744bcee77793a3841c71748fb1af503bf29ff89e5c64471944dd642762a85. CSP portal checks found no missing assets or violations. Standalone and portal viewport checks passed at 390x844 with uniform fit, sufficient backing resolution, no overflow, and no runtime errors."
+    "observed": "Fresh standalone and Arcade production builds succeeded. The Arcade verifier accepted 5 immutable files totaling 1,618,633 bytes with 92,912 bytes of gzipped JavaScript; entry.mjs, stylesheet and all three declared Galmuri font assets were present and hashed. Arcade CSP execution loaded the stylesheet, laid out the 390×844 canvas, returned all requested assets, and recorded zero missing assets, CSP violations, console errors, or page errors. Deployment smoke mounted successfully with sourceHash 5528e1f6047d993038ca4461cc16413f0c06117ea353946c247656624acbd027."
   },
   "notes": [
-    "Verdict is blocked solely because one concrete GDD safety guarantee is missing; deployability and the creator-selected tests otherwise pass.",
-    "No judgment was made about fun, difficulty, originality, balance taste, or whether deterministic/autoplay coverage should have been required."
+    "Review was performed independently from the final GDD, source, fresh production/Arcade builds, creator tests, and runtime verification; the pre-existing design-review.json was not used as evidence.",
+    "Device-specific haptic strength, perceived audio mix, long-session balance, dependency audit findings, and Toss-container behavior are outside this design-conformance/deployability verdict and remain documented in DAY.md."
   ],
   "summary": {
-    "ko": "제작자 테스트와 프로덕션·아케이드 빌드, 390×844, CSP 및 필수 자산 검증은 통과했다. 그러나 폭 76px 안전 통로는 위험 중심만 경계 밖으로 제한해 충돌 반경이 통로 안으로 들어오므로 GDD의 무위험 진행 보장을 충족하지 못해 출고를 차단한다.",
-    "en": "Creator tests, production and arcade builds, the 390x844 viewport, CSP, and required assets all passed. Release is blocked because the 76 px safe corridor constrains hazard centers only; collision radii can still enter the corridor, so the GDD's hazard-free progression guarantee is not implemented."
+    "ko": "최종 GDD의 구체적 플레이·결과 약속이 현재 소스 해시의 프로덕션/아케이드 빌드에 구현되어 있다. 제작자 테스트 30개와 빌드, 불변 릴리스, CSP, 390×844 포함 뷰포트, deployment-only 스모크가 모두 통과해 출고 가능으로 판정한다.",
+    "en": "The current-source production and Arcade builds implement every concrete play and outcome promise in the final GDD. All 30 creator tests, both builds, immutable release verification, CSP execution, viewport checks including 390×844, and deployment-only smoke passed, so the build is cleared for release."
   }
 }
