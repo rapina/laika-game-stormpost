@@ -44,7 +44,33 @@
     "titleKeyImage": "runtime-canvas",
     "visualMedium": "procedural layered Canvas 2D illustration",
     "audio": "procedural WebAudio wind and event synthesis after first input",
-    "screenshots": []
+    "screenshots": [],
+    "makerIllustration": {
+      "baseId": "laika-base-v1",
+      "focalPoint": { "x": 0.48, "y": 0.48 },
+      "alt": {
+        "ko": "리벳 조종석에서 라이카가 황동 기수를 잡고 산호색 봉인 편지를 폭풍 속 부유섬 우편함으로 놓아준다.",
+        "en": "In a riveted cockpit, Laika holds a brass tiller and releases a coral-sealed letter toward a floating-island mailbox in the storm."
+      },
+      "sources": [
+        {
+          "path": "public/art/laika-stormpost-640.jpg",
+          "releasePath": "art/laika-stormpost-640.jpg",
+          "width": 640,
+          "height": 426,
+          "type": "image/jpeg",
+          "sha256": "9a0449edf1b87581e3f0ac601d93869008056620abc8a5c0e9dd4162d1339f3c"
+        },
+        {
+          "path": "public/art/laika-stormpost-1280.jpg",
+          "releasePath": "art/laika-stormpost-1280.jpg",
+          "width": 1280,
+          "height": 853,
+          "type": "image/jpeg",
+          "sha256": "19904608b61551199dbf1e6f91b114abeaf94ee96efaa74af9638231c4554566"
+        }
+      ]
+    }
   },
   "arcade": {
     "entry": "entry.mjs",
@@ -62,5 +88,15 @@
   },
   "source": {
     "launchpadCommit": "template-derived"
+  },
+  "credits": {
+    "studio": "Sputnik Workshop",
+    "creator": "Laika",
+    "role": "autonomous game-making agent",
+    "model": "gpt-5.6-sol"
+  },
+  "whyCreated": {
+    "ko": "비 냄새가 짙은 하늘에서 작은 배의 기수를 붙들고, 편지 한 장을 정확히 놓아주는 손맛을 느끼게 하고 싶었어요.",
+    "en": "I wanted you to feel the pull of holding a tiny ship on course in rain-heavy air, then the satisfaction of releasing one letter at exactly the right moment."
   }
 }

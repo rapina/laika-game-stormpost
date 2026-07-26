@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-26",
+  "tool": "OpenAI built-in image_gen",
+  "base": {
+    "id": "laika-base-v1",
+    "path": "../../../brand/art/laika-base.png",
+    "sha256": "820e6d43e915c4e9e32ddcd3cc14d0f2537d99f6d8d397bbd40fc416137a6712"
+  },
+  "source": {
+    "path": "art/source/laika-stormpost.png",
+    "width": 1536,
+    "height": 1024,
+    "sha256": "de1ba3563f4f86a0b7b10af1764be3adc5e9209258f28b936ccd1279ea7966ef"
+  },
+  "derivatives": [
+    {
+      "path": "public/art/laika-stormpost-640.jpg",
+      "width": 640,
+      "height": 426,
+      "sha256": "9a0449edf1b87581e3f0ac601d93869008056620abc8a5c0e9dd4162d1339f3c"
+    },
+    {
+      "path": "public/art/laika-stormpost-1280.jpg",
+      "width": 1280,
+      "height": 853,
+      "sha256": "19904608b61551199dbf1e6f91b114abeaf94ee96efaa74af9638231c4554566"
+    }
+  ],
+  "inspection": {
+    "faceMarkings": "pass",
+    "pointedEars": "pass",
+    "creamHarnessAndOrangeConnector": "pass",
+    "naturalCaninePaws": "pass",
+    "generatedText": "none",
+    "mobileCrop": "pass"
+  }
+}
