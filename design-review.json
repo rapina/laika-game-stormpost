@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 3,
+  "reviewedAt": "2026-07-26",
+  "sourceHash": "30ad9ad538f1d9a824f48e213c6b7393e1d977b4f90981c2c07438f91db90e65",
+  "verdict": "blocked",
+  "method": {
+    "build": "npm run build:arcade (dist-arcade/entry.mjs, release.json releaseSha fbe27b25c63eb36c9086f0121debecc895129f3c)",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  "designConformance": [
+    {
+      "id": "contracts-and-flight-input",
+      "designClaim": "출항 전 적·청·황 세 계약을 보여 주고, 포인터 드래그로 조향하며 놓아서 투하하고 180ms 이하 짧은 탭은 돌풍을 우선 사용한다.",
+      "status": "implemented",
+      "observed": "인트로와 HUD가 세 색 계약을 표시한다. 프로덕션 런타임은 pointerdown/move/up을 설계 좌표로 변환해 조향하고, 180ms 미만이면서 이동 10px 이하인 입력을 돌풍으로 분기하며 그 외 release는 투하한다."
+    },
+    {
+      "id": "delivery-scoring",
+      "designClaim": "같은 색 섬에 42px 이내로 투하하면 성공하고 20px 이내 정밀 보너스, 건조 보너스, ×1.0/×1.5/×2.0 연속 배율을 적용하며 실패 시 배율을 초기화한다.",
+      "status": "implemented",
+      "observed": "런타임은 가장 가까운 미배달 색 계약과 섬을 대응시키고 42px을 성공 경계로 사용한다. 공용 점수 함수가 1,000 기본점, 20px 이내 400점, 마른 편지 250점과 최대 ×2 배율을 계산하며 실패 투하와 충돌이 콤보를 0으로 만든다."
+    },
+    {
+      "id": "hull-wetness-and-gust",
+      "designClaim": "선체는 4칸이고 충돌 시 1칸 감소, 1.2초 무적, 첫 미배달 편지 침수 효과가 있으며 돌풍은 1칸으로 시작해 상승 기류에서 최대 3칸까지 충전하고 위험을 밀어내며 잠시 보호한다.",
+      "status": "implemented",
+      "observed": "선체 4로 시작하며 위험 접촉 시 hull 감소, inv=1.2, 첫 미배달 건조 편지 wet 전환이 실행된다. 중앙 상승 기류 체류 2.5초마다 돌풍을 최대 3까지 충전하고 돌풍은 1을 소모해 130px 내 위험을 밀고 0.7초 보호한다."
+    },
+    {
+      "id": "gate-and-ending",
+      "designClaim": "세 계약 완료 전에는 관문이 잠기고, 모두 배달한 뒤 상단 관문 통과 시 귀환하며 선체 0 또는 제한 시간 종료 시 조난한다. GameResult.phase는 성공 배달 수다.",
+      "status": "implemented",
+      "observed": "세 편지가 모두 delivered일 때만 관문 색과 통과 판정이 열리고 상단 중앙 통과는 성공 종료한다. 360초 또는 hull<=0은 실패 종료하며 onGameOver의 phase는 delivered 개수다."
+    },
+    {
+      "id": "final-score-grade-and-emergency",
+      "designClaim": "남은 시간 초당 8점과 선체 칸당 250점을 더하고 S 5,200+, A 4,200+, B 3,000+, 그 아래 C, 조난 D로 판정한다. 황색 계약은 두 번째 이전 900점, 마지막 500점이다.",
+      "status": "implemented",
+      "observed": "finalScore와 grade가 명시한 시간·선체 보너스 및 등급 경계를 사용한다. 황색 배달 시 이미 배달된 계약이 2개 미만이면 900점, 마지막이면 500점을 더한다."
+    },
+    {
+      "id": "procedural-forward-route",
+      "designClaim": "카메라가 항로를 따라 전진하고, 시드에 따라 섬의 좌우 위치와 구름·새·상승 기류 배치를 만들며 시작점에서 관문까지 안전 통로를 남긴다.",
+      "status": "missing",
+      "observed": "프로덕션 런타임은 카메라 이동 없이 390×844 한 화면 전체를 고정해서 그린다. 섬은 (88,610), (306,430), (94,250), 상승 기류는 화면 중앙 고정이며 시드는 위험 초기 배치와 비에만 쓰인다. 시드별 섬/상승 기류 배치나 안전 통로 생성·검사가 없다."
+    },
+    {
+      "id": "hazard-motion-and-lightning-warning",
+      "designClaim": "위험은 시간에 따라 아래로 흐르고 새 떼는 횡단하며 번개는 경고 섬광 뒤 활성화된다.",
+      "status": "missing",
+      "observed": "새와 구름 모두 x축 속도만 갱신되어 횡단하고 아래쪽 흐름은 없다. 구름의 번개 선은 사인 조건에서 시각적으로 깜박이지만 충돌 판정은 계속 활성 상태여서 경고 단계 뒤 활성화되는 별도 번개 상태가 없다."
+    },
+    {
+      "id": "stamp-cosmetic-progression",
+      "designClaim": "종료 점수 1,000점당 우표 1개를 로컬에 누적하고 4/9/15개에서 선체 장식·돛·돌풍 외형을 순서대로 해금하며 성능은 올리지 않는다.",
+      "status": "missing",
+      "observed": "게임 종료와 결과 처리에서 우표 산정·누적 저장을 하지 않으며 우표 수나 4/9/15 임계치에 따른 외형 선택·렌더링 코드가 없다."
+    },
+    {
+      "id": "keyboard-pause-and-audio-lifecycle",
+      "designClaim": "방향키/WASD, Space, Shift, P, M을 지원하고 문서 비활성화 시 일시정지하며 첫 사용자 입력 전 WebAudio를 시작하지 않는다.",
+      "status": "implemented",
+      "observed": "키 입력은 방향 조향, Space 투하, Shift 돌풍, P 일시정지, M 음소거로 연결된다. visibilitychange가 숨김 상태에서 일시정지하며 AudioContext는 포인터 입력 또는 M 입력의 unlock 전에는 생성되지 않는다."
+    },
+    {
+      "id": "bilingual-parity",
+      "designClaim": "한국어와 영어가 같은 규칙과 상태 정보를 제공한다.",
+      "status": "implemented",
+      "observed": "게임 런타임의 인트로, 조작 안내, 상태 메시지, 일시정지 및 결과 문구가 ko/en 분기를 갖고 동일한 게임 상태를 사용한다. viewport 검증은 두 언어 결과 UI를 각각 확인했다."
+    }
+  ],
+  "creatorTests": [
+    {
+      "command": "npm test",
+      "covers": "배달 반경과 점수, 침수 순서, 관문 잠금, 최종 보너스·등급, 로직 RNG, 기록 및 번역 키 검증",
+      "status": "pass"
+    },
+    {
+      "command": "npm run build",
+      "covers": "TypeScript 검사와 standalone 프로덕션 Vite 번들",
+      "status": "pass"
+    },
+    {
+      "command": "npm run build:arcade",
+      "covers": "Arcade 프로덕션 번들, 불변 릴리스 생성과 파일 해시 검증",
+      "status": "pass"
+    },
+    {
+      "command": "npm run smoke -- 17 90000",
+      "covers": "현재 deployment-only 스모크의 Arcade 런타임 마운트와 콘솔·페이지 오류 부재",
+      "status": "pass"
+    },
+    {
+      "command": "npm run viewport",
+      "covers": "360×800, 390×844, 430×932, 900×760 standalone/portal의 레터박스·DPR·넘침·오류와 ko/en 결과 UI",
+      "status": "pass"
+    }
+  ],
+  "deployable": {
+    "status": "pass",
+    "observed": "standalone 및 Arcade 빌드가 성공했다. Arcade release.json은 entry.mjs, CSS와 필수 Galmuri 글꼴 3개를 포함한 5개 파일(1,615,455 bytes)을 해시 검증했다. 390×844 standalone/portal은 균일 레터박스, 충분한 DPR backing store, 화면 내부 배치, 페이지 넘침 없음과 오류 0으로 통과했고 sourceHash는 smoke-result.json과 일치한다."
+  },
+  "notes": [
+    "빌드와 제작자 테스트는 모두 통과했지만 최종 GDD의 절차 항로, 위험 흐름/번개 활성 단계, 우표 외형 진행 약속이 실제 프로덕션 빌드에 없어 출고를 차단한다.",
+    "DAY.md에 기록된 과거 상호작용·완주 스모크와 달리 현재 npm run smoke는 잠금 커밋의 deployment-only 정책으로 마운트와 치명 오류만 재검증한다. 이는 본 판정의 누락 근거가 아니라 실행한 현재 명령의 관찰 범위 기록이다."
+  ],
+  "summary": {
+    "ko": "배달·점수·피해·돌풍·관문·종료·입력·양언어 약속과 배포 가능성은 확인했지만, 시드 기반 전진 항로, 아래로 흐르는 위험과 경고 후 활성 번개, 로컬 우표 및 4/9/15 외형 해금이 구현되지 않아 출고를 차단합니다.",
+    "en": "Delivery, scoring, damage, gust, gate, ending, input, bilingual parity, and deployability are present, but release is blocked because the seeded forward route, downward-moving hazards with warning-then-active lightning, and local stamp progression with 4/9/15 cosmetic unlocks are not implemented."
+  }
+}
