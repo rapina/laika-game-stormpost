@@ -2,7 +2,7 @@ import { APP_CONFIG } from '../appConfig'
 import { getLocale } from '../i18n'
 import { logicRandom } from './logicRng'
 import type { GameCallbacks, GameRuntime } from './types'
-import { altitudeAfter, canOpenGate, cosmeticTier, deliveryScore, finalScore, generateRoute, grade, lightningPhase, placeOutsideCorridor, stampReward, wetFirstPending, type Letter, type Seal } from './stormpostRules'
+import { altitudeAfter, canOpenGate, corridorClearance, cosmeticTier, deliveryScore, finalScore, generateRoute, grade, lightningPhase, placeOutsideCorridor, stampReward, wetFirstPending, type Letter, type Seal } from './stormpostRules'
 import { StormAudio } from './StormAudio'
 
 const W = APP_CONFIG.designWidth
@@ -83,7 +83,7 @@ export class StormpostGame implements GameRuntime {
             this.canvas.style.width = `${W * scale}px`; this.canvas.style.height = `${H * scale}px`
         }
         fit(); this.resizeObs = new ResizeObserver(fit); this.resizeObs.observe(container)
-        for (let i = 0; i < 9; i++) {const rawX=35+logicRandom()*320;this.hazards.push({ x: placeOutsideCorridor(rawX,this.corridor.x,this.corridor.halfWidth), y: 120 + logicRandom() * 580, vx: (logicRandom() - .5) * 25, vy:18+logicRandom()*18, age:logicRandom()*4, kind: i % 3 ? 'cloud' : 'birds', r: 19 + logicRandom() * 12 })}
+        for (let i = 0; i < 9; i++) {const rawX=35+logicRandom()*320,kind=i%3?'cloud':'birds',r=19+logicRandom()*12;this.hazards.push({ x: placeOutsideCorridor(rawX,this.corridor.x,this.corridor.halfWidth,r), y: 120 + logicRandom() * 580, vx: (logicRandom() - .5) * 25, vy:18+logicRandom()*18, age:logicRandom()*4, kind, r })}
         for (let i = 0; i < 100; i++) this.rain.push({ x: logicRandom() * W, y: logicRandom() * H, s: 250 + logicRandom() * 300 })
         this.bind()
         ;(globalThis as any).__forceGameOver = () => this.finish(canOpenGate(this.letters))
@@ -157,7 +157,7 @@ export class StormpostGame implements GameRuntime {
         for (const h of this.hazards) {
             h.age+=dt;h.x += h.vx*dt;h.y+=h.vy*dt;if(h.y>H+35)h.y=95
             if (h.x < -30) h.x=W+30; if (h.x>W+30) h.x=-30
-            if(Math.abs(h.x-this.corridor.x)<this.corridor.halfWidth){h.x=placeOutsideCorridor(h.x,this.corridor.x,this.corridor.halfWidth);h.vx*=-1}
+            if(Math.abs(h.x-this.corridor.x)<corridorClearance(this.corridor.halfWidth,h.r)){h.x=placeOutsideCorridor(h.x,this.corridor.x,this.corridor.halfWidth,h.r);h.vx*=-1}
             const dangerous=h.kind==='birds'||lightningPhase(h.age)==='active'
             if (dangerous&&this.ship.inv <= 0 && Math.hypot(this.ship.x-h.x,this.ship.y-h.y)<h.r+17) this.hit(h.x)
         }

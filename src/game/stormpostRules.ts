@@ -62,9 +62,21 @@ export function lightningPhase(age:number):LightningPhase {
     return cycle<1?'warning':cycle<1.65?'active':'cooldown'
 }
 
-export function placeOutsideCorridor(x:number,corridorX:number,halfWidth:number){
-    if(Math.abs(x-corridorX)>=halfWidth)return x
-    return x<corridorX?Math.max(25,corridorX-halfWidth):Math.min(365,corridorX+halfWidth)
+export const SHIP_COLLISION_RADIUS=17
+export function corridorClearance(halfWidth:number,hazardRadius:number){
+    return halfWidth+hazardRadius+SHIP_COLLISION_RADIUS
+}
+export function placeOutsideCorridor(x:number,corridorX:number,halfWidth:number,hazardRadius:number){
+    const required=corridorClearance(halfWidth,hazardRadius)
+    if(Math.abs(x-corridorX)>=required)return x
+    const left=corridorX-required, right=corridorX+required
+    const leftValid=left>=25, rightValid=right<=365
+    if(leftValid&&rightValid)return x<corridorX?left:right
+    if(leftValid)return left
+    if(rightValid)return right
+    // Route generation constrains corridorX so this is unreachable for the
+    // game's maximum radius, but retain the farther edge as a safe fallback.
+    return corridorX-25>365-corridorX?25:365
 }
 
 export function altitudeAfter(altitude:number,dt:number,inLift:boolean){
