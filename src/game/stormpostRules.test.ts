@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { canOpenGate, deliveryScore, finalScore, grade, wetFirstPending, type Letter } from './stormpostRules'
+import { canOpenGate, cosmeticTier, deliveryScore, finalScore, generateRoute, grade, lightningPhase, stampReward, wetFirstPending, type Letter } from './stormpostRules'
 
 const letters = (): Letter[] => [
     { seal: 'coral', wet: false, delivered: false },
@@ -29,5 +29,23 @@ describe('Stormpost delivery contract', () => {
         expect(finalScore(3000, 10.9, 3)).toBe(3830)
         expect(grade(5200, true)).toBe('S')
         expect(grade(9999, false)).toBe('D')
+    })
+    it('creates a reproducible seeded route with bounded islands and lift',()=>{
+        const seq=[.1,.8,.4,.6];let i=0
+        const a=generateRoute(()=>seq[i++%seq.length]);i=0
+        const b=generateRoute(()=>seq[i++%seq.length])
+        expect(a).toEqual(b)
+        expect(a.islands.map(x=>x.seal)).toEqual(['coral','azure','gold'])
+        expect(a.islands.every(x=>x.x>=62&&x.x<=328)).toBe(true)
+        expect(a.updraft.x).toBeGreaterThanOrEqual(72)
+    })
+    it('stages lightning warning before damage and cooldown',()=>{
+        expect(lightningPhase(.5)).toBe('warning')
+        expect(lightningPhase(1.2)).toBe('active')
+        expect(lightningPhase(2)).toBe('cooldown')
+    })
+    it('awards persistent stamp quantities and cosmetic thresholds',()=>{
+        expect(stampReward(3999)).toBe(3)
+        expect([3,4,9,15].map(cosmeticTier)).toEqual([0,1,2,3])
     })
 })

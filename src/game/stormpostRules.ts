@@ -1,5 +1,9 @@
 export type Seal = 'coral' | 'azure' | 'gold'
 export type Letter = { seal: Seal; wet: boolean; delivered: boolean }
+export type RouteLayout = {
+    islands: { x:number; y:number; seal:Seal }[]
+    updraft: { x:number; y:number }
+}
 
 export const DELIVERY_RADIUS = 42
 
@@ -34,4 +38,24 @@ export function wetFirstPending(letters: Letter[]): Letter[] {
 
 export function canOpenGate(letters: Letter[]): boolean {
     return letters.length === 3 && letters.every(letter => letter.delivered)
+}
+
+export function generateRoute(random:()=>number):RouteLayout {
+    const seals:Seal[]=['coral','azure','gold']
+    const ys=[620,430,245]
+    const islands=seals.map((seal,i)=>({seal,y:ys[i],x:62+random()*266}))
+    // Central lift stays at least 68px from every mailbox, leaving a readable
+    // approach corridor while its horizontal position remains seed-driven.
+    let x=80+random()*230
+    for(const island of islands) if(Math.abs(x-island.x)<68)x+=x<195?68:-68
+    return {islands,updraft:{x:Math.max(72,Math.min(318,x)),y:520}}
+}
+
+export function stampReward(score:number){return Math.max(0,Math.floor(score/1000))}
+export function cosmeticTier(stamps:number){return stamps>=15?3:stamps>=9?2:stamps>=4?1:0}
+
+export type LightningPhase='warning'|'active'|'cooldown'
+export function lightningPhase(age:number):LightningPhase {
+    const cycle=((age%4)+4)%4
+    return cycle<1?'warning':cycle<1.65?'active':'cooldown'
 }

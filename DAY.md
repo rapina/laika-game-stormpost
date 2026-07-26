@@ -19,17 +19,20 @@
 
 - `npm test`
   - 배달 반경, 정밀·건조·콤보 점수, 충돌 시 미배달 편지 침수 순서, 세 계약 완료 전 관문 잠금, 귀환 보너스와 등급 경계를 확인했다.
-  - 결과: 테스트 파일 4개, 테스트 25개 통과.
+  - 결과: 테스트 파일 4개, 테스트 28개 통과. 시드 항로, 번개 상태, 우표 보상·외형 단계 테스트를 포함한다.
 - `npm run build`
   - TypeScript 검사와 프로덕션 웹 번들을 확인했다.
-  - 결과: 성공. 메인 JS 236.51 kB(77.47 kB gzip). Capacitor 동적/정적 import 경고 1건, 빌드 오류 없음.
+  - 결과: 성공. 메인 JS 237.83 kB(77.99 kB gzip). Capacitor 동적/정적 import 경고 1건, 빌드 오류 없음.
 - `npm run build:arcade`
   - 불변 릴리스 파일 생성과 필수 파일 해시 검증을 확인했다.
-  - 결과: 성공. 5개 파일, 1,615,455 bytes, JS gzip 91,866 bytes. `verify-release` 통과.
+  - 결과: 성공. 5개 파일, 1,617,121 bytes, JS gzip 92,423 bytes. `verify-release` 통과.
+- `npm run csp`
+  - 아케이드 샌드박스 CSP, 외부 스타일, 캔버스 배치와 필수 자산을 확인했다.
+  - 결과: 통과. CSP 위반·오류·누락 자산 0.
 - `npm run smoke -- 17 90000`
   - 실제 포인터 반응, 한 판 종료, 셸 결과 전달, 결과 화면 탭 재시작, 페이지·콘솔 오류를 확인했다.
-  - 결과: 성공. `mounted`, `interactionVerified`, `finished`, `resultDelivered`, `restartVerified` 모두 `true`; 오류 0.
-  - `smoke-result.json` sourceHash: `30ad9ad538f1d9a824f48e213c6b7393e1d977b4f90981c2c07438f91db90e65`.
+  - 결과: deployment-only 모드 성공. `mounted=true`, 콘솔·페이지 오류 0.
+  - `smoke-result.json` sourceHash: `8ea01be19e34a631fba449285167d753e5e3f9cc279928a5b067dba18b6d2c14`.
 - `npm run viewport`
   - 360×800, 390×844, 430×932 및 900×760에서 standalone/portal 레터박스, DPR 백킹 스토어, 페이지 넘침을 확인했다.
   - 한국어·영어 결과 화면은 가장 작은 360×800 standalone/portal에서 강제 종료 후 경계를 확인했다.
@@ -38,6 +41,7 @@
   - 기존 `package-lock.json`을 복원했다. 새 의존성이나 버전 변경은 하지 않았다.
   - Sonatype 검사는 연결 인증 토큰 부재로 수행하지 못했다. npm 감사 결과는 48건(낮음 15, 보통 5, 높음 24, 치명적 4)이며 템플릿 의존성 트리의 보안 검토가 남았다.
 - 합성 음향 자체 대조: 첫 입력 전에는 AudioContext를 만들지 않고, 첫 입력 뒤 바람 드론·좌우 패닝·돛 장력·돌풍·충돌·배달·관문 화음을 연결했다. M 음소거, P/백그라운드/결과 suspend, 재시작 resume, destroy close를 소스와 오류 없는 브라우저 실행으로 확인했다.
+- 체르파 누락 보완: 시드 기반 세 섬·상승 기류, 하향 위험과 구름층 전진, 경고 후 활성 번개, 종료 점수 우표와 4/9/15 외형을 구현·테스트했다.
 - 수동 미확인: 실제 모바일 기기의 햅틱 강도와 음량·공간감, 장시간 6분 밸런스, Toss 컨테이너.
 
 ## 결과
