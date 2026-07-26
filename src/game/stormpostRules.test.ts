@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { canOpenGate, cosmeticTier, deliveryScore, finalScore, generateRoute, grade, lightningPhase, stampReward, wetFirstPending, type Letter } from './stormpostRules'
+import { altitudeAfter, canOpenGate, cosmeticTier, deliveryScore, finalScore, generateRoute, grade, lightningPhase, placeOutsideCorridor, stampReward, wetFirstPending, type Letter } from './stormpostRules'
 
 const letters = (): Letter[] => [
     { seal: 'coral', wet: false, delivered: false },
@@ -47,5 +47,22 @@ describe('Stormpost delivery contract', () => {
     it('awards persistent stamp quantities and cosmetic thresholds',()=>{
         expect(stampReward(3999)).toBe(3)
         expect([3,4,9,15].map(cosmeticTier)).toEqual([0,1,2,3])
+    })
+    it('drains altitude outside lift and restores it inside lift',()=>{
+        expect(altitudeAfter(60,10,false)).toBe(32)
+        expect(altitudeAfter(60,1,true)).toBe(82)
+        expect(altitudeAfter(98,1,true)).toBe(100)
+    })
+    it('guarantees a hazard-free corridor across many seeded layouts',()=>{
+        for(let seed=1;seed<=200;seed++){
+            let state=seed>>>0
+            const random=()=>((state=(state*1664525+1013904223)>>>0)/4294967296)
+            const route=generateRoute(random)
+            for(let n=0;n<30;n++){
+                const raw=35+random()*320
+                const placed=placeOutsideCorridor(raw,route.corridor.x,route.corridor.halfWidth)
+                expect(Math.abs(placed-route.corridor.x)).toBeGreaterThanOrEqual(route.corridor.halfWidth)
+            }
+        }
     })
 })

@@ -2,7 +2,7 @@ import { APP_CONFIG } from '../appConfig'
 import { getLocale } from '../i18n'
 import { logicRandom } from './logicRng'
 import type { GameCallbacks, GameRuntime } from './types'
-import { canOpenGate, cosmeticTier, deliveryScore, finalScore, generateRoute, grade, lightningPhase, stampReward, wetFirstPending, type Letter, type Seal } from './stormpostRules'
+import { altitudeAfter, canOpenGate, cosmeticTier, deliveryScore, finalScore, generateRoute, grade, lightningPhase, placeOutsideCorridor, stampReward, wetFirstPending, type Letter, type Seal } from './stormpostRules'
 import { StormAudio } from './StormAudio'
 
 const W = APP_CONFIG.designWidth
@@ -55,6 +55,9 @@ export class StormpostGame implements GameRuntime {
     private routeOffset=0
     private stamps=0
     private cosmetic=0
+    private altitude=76
+    private corridor={x:W/2,halfWidth:38}
+    private altitudeDamageReady=true
 
     async mount(container: HTMLElement, callbacks: GameCallbacks): Promise<void> {
         this.cb = callbacks
@@ -62,6 +65,7 @@ export class StormpostGame implements GameRuntime {
         const route=generateRoute(logicRandom)
         this.islands=route.islands.map((x,i)=>({...x,pulse:i*2}))
         this.updraft=route.updraft
+        this.corridor=route.corridor
         try{this.stamps=Number(localStorage.getItem('stormpost:stamps')||0)||0}catch{this.stamps=0}
         this.cosmetic=cosmeticTier(this.stamps)
         this.canvas = document.createElement('canvas')
@@ -79,7 +83,7 @@ export class StormpostGame implements GameRuntime {
             this.canvas.style.width = `${W * scale}px`; this.canvas.style.height = `${H * scale}px`
         }
         fit(); this.resizeObs = new ResizeObserver(fit); this.resizeObs.observe(container)
-        for (let i = 0; i < 9; i++) this.hazards.push({ x: 35 + logicRandom() * 320, y: 120 + logicRandom() * 580, vx: (logicRandom() - .5) * 25, vy:18+logicRandom()*18, age:logicRandom()*4, kind: i % 3 ? 'cloud' : 'birds', r: 19 + logicRandom() * 12 })
+        for (let i = 0; i < 9; i++) {const rawX=35+logicRandom()*320;this.hazards.push({ x: placeOutsideCorridor(rawX,this.corridor.x,this.corridor.halfWidth), y: 120 + logicRandom() * 580, vx: (logicRandom() - .5) * 25, vy:18+logicRandom()*18, age:logicRandom()*4, kind: i % 3 ? 'cloud' : 'birds', r: 19 + logicRandom() * 12 })}
         for (let i = 0; i < 100; i++) this.rain.push({ x: logicRandom() * W, y: logicRandom() * H, s: 250 + logicRandom() * 300 })
         this.bind()
         ;(globalThis as any).__forceGameOver = () => this.finish(canOpenGate(this.letters))
@@ -146,10 +150,14 @@ export class StormpostGame implements GameRuntime {
         this.ship.angle = this.ship.vx * .006
         this.audio.update((this.ship.x/W-.5)*2,Math.hypot(this.ship.vx,this.ship.vy))
         const inLift = Math.hypot(this.ship.x-this.updraft.x, this.ship.y-this.updraft.y) < 72
+        this.altitude=altitudeAfter(this.altitude,dt,inLift)
+        if(this.altitude<=0&&this.altitudeDamageReady){this.altitudeDamageReady=false;this.hit(this.ship.x);this.altitude=28;this.say(this.locale==='ko'?'고도 상실 · 선체 충격':'ALTITUDE LOST · HULL IMPACT')}
+        if(this.altitude>35)this.altitudeDamageReady=true
         if (inLift) { this.charge += dt; if (this.charge > 2.5 && this.gust < 3) { this.gust++; this.charge = 0; this.audio.tone('sail',(this.ship.x/W-.5)*2) } }
         for (const h of this.hazards) {
             h.age+=dt;h.x += h.vx*dt;h.y+=h.vy*dt;if(h.y>H+35)h.y=95
             if (h.x < -30) h.x=W+30; if (h.x>W+30) h.x=-30
+            if(Math.abs(h.x-this.corridor.x)<this.corridor.halfWidth){h.x=placeOutsideCorridor(h.x,this.corridor.x,this.corridor.halfWidth);h.vx*=-1}
             const dangerous=h.kind==='birds'||lightningPhase(h.age)==='active'
             if (dangerous&&this.ship.inv <= 0 && Math.hypot(this.ship.x-h.x,this.ship.y-h.y)<h.r+17) this.hit(h.x)
         }
@@ -196,7 +204,7 @@ export class StormpostGame implements GameRuntime {
         this.cb.onGameOver({score:total,phase:this.letters.filter(l=>l.delivered).length})
     }
     private restart() {
-        this.over=false;this.started=true;this.audio.setPaused(false);this.elapsed=0;this.score=0;this.combo=0;this.gust=1;this.charge=0
+        this.over=false;this.started=true;this.audio.setPaused(false);this.elapsed=0;this.score=0;this.combo=0;this.gust=1;this.charge=0;this.altitude=76;this.altitudeDamageReady=true
         this.ship={x:W/2,y:H*.7,vx:0,vy:0,angle:0,hull:4,inv:0}
         this.letters=[
             {seal:'coral',wet:false,delivered:false},
@@ -223,11 +231,11 @@ export class StormpostGame implements GameRuntime {
     private drawHazard(c:CanvasRenderingContext2D,h:Hazard,t:number){c.save();c.translate(h.x,h.y);if(h.kind==='birds'){c.strokeStyle='#10191e';c.lineWidth=3;for(let i=-1;i<=1;i++){c.beginPath();c.arc(i*14,Math.sin(t*4+i)*5,8,3.5,5.9);c.stroke();c.beginPath();c.arc(i*14+15,Math.sin(t*4+i)*5,8,3.5,5.9);c.stroke()}}else{const phase=lightningPhase(h.age);c.fillStyle=phase==='warning'?'#7a6844':phase==='active'?'#34425a':'#1d2a38dd';for(let i=-1;i<2;i++){c.beginPath();c.arc(i*15,0,h.r*.7,0,7);c.fill()}if(phase==='warning'){c.strokeStyle=`rgba(255,220,100,${.45+.45*Math.sin(t*14)})`;c.lineWidth=3;c.beginPath();c.arc(0,0,h.r+8,0,7);c.stroke()}if(phase==='active'){c.strokeStyle='#f5dc82';c.lineWidth=4;c.beginPath();c.moveTo(0,12);c.lineTo(-8,30);c.lineTo(2,27);c.lineTo(-5,48);c.stroke()}}c.restore()}
     private drawGate(c:CanvasRenderingContext2D,t:number){const open=canOpenGate(this.letters);c.save();c.translate(W/2,65);c.strokeStyle=open?'#f4cf7a':'#52646c';c.lineWidth=8;c.beginPath();c.arc(0,0,58,0,Math.PI);c.stroke();if(open){c.strokeStyle=`rgba(244,207,122,${.4+.3*Math.sin(t*4)})`;c.lineWidth=18;c.stroke()}c.restore()}
     private drawShip(c:CanvasRenderingContext2D,t:number){const s=this.ship;c.save();c.translate(s.x,s.y);c.rotate(s.angle);c.globalAlpha=s.inv&&Math.sin(t*24)>0?.35:1;c.fillStyle=this.cosmetic>=1?'#8b5936':'#6c412c';c.beginPath();c.moveTo(-18,8);c.lineTo(18,8);c.lineTo(11,24);c.lineTo(-12,24);c.closePath();c.fill();c.strokeStyle='#ead8ac';c.lineWidth=3;c.beginPath();c.moveTo(0,10);c.lineTo(0,-28);c.stroke();c.fillStyle=this.cosmetic>=2?'#8fd6c8':'#f1c77c';c.beginPath();c.moveTo(2,-24);c.quadraticCurveTo(25,-8+Math.sin(t*5)*3,3,5);c.closePath();c.fill();if(this.cosmetic>=3){c.strokeStyle='#f4cf7a';c.beginPath();c.arc(0,12,27,0,7);c.stroke()}c.fillStyle='#ef6f61';c.beginPath();c.arc(0,16,5,0,7);c.fill();c.restore()}
-    private drawHud(c:CanvasRenderingContext2D){c.fillStyle='#06151ccc';c.fillRect(12,12,W-24,78);c.strokeStyle='#7ba9a5';c.strokeRect(12,12,W-24,78);c.fillStyle='#f7e8bd';c.font='bold 15px Galmuri11';c.fillText(tr[this.locale].route,24,35);c.font='12px Galmuri11';c.fillText(`${Math.max(0,Math.ceil(RUN_SECONDS-this.elapsed))}s  ✦${this.stamps}`,300,35);c.fillText(`♥ ${'◆'.repeat(this.ship.hull)}  ↯ ${this.gust}/3`,24,58);c.fillText(`${this.score.toString().padStart(5,'0')}  ×${(1+this.combo*.5).toFixed(1)}`,245,58);this.letters.forEach((l,n)=>{c.fillStyle=l.delivered?'#76937b':colors[l.seal];c.fillRect(24+n*45,69,34,9);if(l.wet&&!l.delivered){c.fillStyle='#7fa9be';c.fillRect(26+n*45,71,30,5)}});if(this.messageTime>0){c.fillStyle='#071b2add';c.fillRect(45,108,300,36);c.fillStyle='#fff3cd';c.textAlign='center';c.fillText(this.message,W/2,132);c.textAlign='left'}}
+    private drawHud(c:CanvasRenderingContext2D){c.fillStyle='#06151ccc';c.fillRect(12,12,W-24,78);c.strokeStyle='#7ba9a5';c.strokeRect(12,12,W-24,78);c.fillStyle='#f7e8bd';c.font='bold 15px Galmuri11';c.fillText(tr[this.locale].route,24,35);c.font='12px Galmuri11';c.fillText(`${Math.max(0,Math.ceil(RUN_SECONDS-this.elapsed))}s  ✦${this.stamps}`,300,35);c.fillText(`♥ ${'◆'.repeat(this.ship.hull)}  ↯ ${this.gust}/3`,24,58);c.fillText(`${this.score.toString().padStart(5,'0')}  ×${(1+this.combo*.5).toFixed(1)}`,245,58);c.fillStyle='#29464c';c.fillRect(167,69,92,9);c.fillStyle=this.altitude<25?'#ef6f61':'#8fd6c8';c.fillRect(167,69,92*this.altitude/100,9);c.fillStyle='#e8dbc0';c.font='9px Galmuri11';c.fillText(`ALT ${Math.round(this.altitude)}`,181,78);this.letters.forEach((l,n)=>{c.fillStyle=l.delivered?'#76937b':colors[l.seal];c.fillRect(24+n*45,69,34,9);if(l.wet&&!l.delivered){c.fillStyle='#7fa9be';c.fillRect(26+n*45,71,30,5)}});if(this.messageTime>0){c.fillStyle='#071b2add';c.fillRect(45,108,300,36);c.fillStyle='#fff3cd';c.textAlign='center';c.fillText(this.message,W/2,132);c.textAlign='left'}}
     private drawIntro(c:CanvasRenderingContext2D){c.fillStyle='#06141ddd';c.fillRect(24,160,W-48,520);c.strokeStyle='#f4cf7a';c.lineWidth=2;c.strokeRect(24,160,W-48,520);c.textAlign='center';c.fillStyle='#f4cf7a';c.font='bold 31px Galmuri14';c.fillText(this.locale==='ko'?'폭풍 우편':'STORMPOST',W/2,225);c.font='15px Galmuri11';c.fillStyle='#e8dbc0';c.fillText(tr[this.locale].drag,W/2,275);this.letters.forEach((l,n)=>{c.fillStyle=colors[l.seal];c.beginPath();c.arc(110+n*85,355,24,0,7);c.fill();c.fillStyle='#071b2a';c.fillRect(98+n*85,349,24,13)});c.fillStyle='#bcd1cf';c.font='13px Galmuri11';const lines=this.locale==='ko'?['세 계약을 배달하세요','구름과 새를 피하고 상승 기류를 타세요','모든 봉인이 켜지면 관문으로 귀환합니다']:['DELIVER ALL THREE CONTRACTS','DODGE CLOUDS · RIDE THE UPDRAFT','LIGHT THE SEALS AND RETURN'];lines.forEach((x,i)=>c.fillText(x,W/2,430+i*36));c.fillStyle='#f4cf7a';c.font='bold 17px Galmuri11';c.fillText(tr[this.locale].tap,W/2,610);c.textAlign='left'}
     private overlay(c:CanvasRenderingContext2D,a:string,b:string){c.fillStyle='#06141de8';c.fillRect(0,0,W,H);c.textAlign='center';c.fillStyle='#f4cf7a';c.font='bold 26px Galmuri14';c.fillText(a,W/2,H/2);c.font='14px Galmuri11';c.fillText(b,W/2,H/2+44);c.textAlign='left'}
     private drawResult(c:CanvasRenderingContext2D){c.fillStyle='#06141df0';c.fillRect(35,220,320,390);c.strokeStyle='#f4cf7a';c.lineWidth=2;c.strokeRect(35,220,320,390);c.textAlign='center';c.fillStyle='#e8dbc0';c.font='bold 20px Galmuri11';c.fillText(this.result.grade==='D'?tr[this.locale].lost:tr[this.locale].return,W/2,275);c.fillStyle='#f4cf7a';c.font='bold 92px Galmuri14';c.fillText(this.result.grade,W/2,385);c.font='bold 25px Galmuri11';c.fillText(this.result.score.toString(),W/2,440);c.font='14px Galmuri11';c.fillStyle='#bcd1cf';c.fillText(`${this.letters.filter(l=>l.delivered).length}/3  ·  ♥ ${this.ship.hull}`,W/2,485);c.font='13px Galmuri11';c.fillText(this.locale==='ko'?'결과 화면으로 이동합니다':'OPENING RESULTS',W/2,560);c.textAlign='left'}
 
     destroy(){cancelAnimationFrame(this.raf);this.audio.destroy();this.resizeObs?.disconnect();this.canvas?.removeEventListener('pointerdown',this.down);this.canvas?.removeEventListener('pointermove',this.move);this.canvas?.removeEventListener('pointerup',this.up);window.removeEventListener('keydown',this.keyDown);window.removeEventListener('keyup',this.keyUp);document.removeEventListener('visibilitychange',this.visibility);delete (globalThis as any).__forceGameOver}
-    getDebugState(){return{over:this.over,score:this.score,timeLeft:Math.round((RUN_SECONDS-this.elapsed)*10)/10,started:this.started,delivered:this.letters.filter(l=>l.delivered).length,hull:this.ship.hull,gust:this.gust,paused:this.paused}}
+    getDebugState(){return{over:this.over,score:this.score,timeLeft:Math.round((RUN_SECONDS-this.elapsed)*10)/10,started:this.started,delivered:this.letters.filter(l=>l.delivered).length,hull:this.ship.hull,gust:this.gust,altitude:Math.round(this.altitude),paused:this.paused}}
 }

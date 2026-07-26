@@ -3,6 +3,7 @@ export type Letter = { seal: Seal; wet: boolean; delivered: boolean }
 export type RouteLayout = {
     islands: { x:number; y:number; seal:Seal }[]
     updraft: { x:number; y:number }
+    corridor: { x:number; halfWidth:number }
 }
 
 export const DELIVERY_RADIUS = 42
@@ -48,7 +49,8 @@ export function generateRoute(random:()=>number):RouteLayout {
     // approach corridor while its horizontal position remains seed-driven.
     let x=80+random()*230
     for(const island of islands) if(Math.abs(x-island.x)<68)x+=x<195?68:-68
-    return {islands,updraft:{x:Math.max(72,Math.min(318,x)),y:520}}
+    const corridorX=Math.max(92,Math.min(298,x))
+    return {islands,updraft:{x:corridorX,y:520},corridor:{x:corridorX,halfWidth:38}}
 }
 
 export function stampReward(score:number){return Math.max(0,Math.floor(score/1000))}
@@ -58,4 +60,14 @@ export type LightningPhase='warning'|'active'|'cooldown'
 export function lightningPhase(age:number):LightningPhase {
     const cycle=((age%4)+4)%4
     return cycle<1?'warning':cycle<1.65?'active':'cooldown'
+}
+
+export function placeOutsideCorridor(x:number,corridorX:number,halfWidth:number){
+    if(Math.abs(x-corridorX)>=halfWidth)return x
+    return x<corridorX?Math.max(25,corridorX-halfWidth):Math.min(365,corridorX+halfWidth)
+}
+
+export function altitudeAfter(altitude:number,dt:number,inLift:boolean){
+    const rate=inLift?22:-2.8
+    return Math.max(0,Math.min(100,altitude+rate*dt))
 }
