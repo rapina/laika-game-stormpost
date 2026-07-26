@@ -63,3 +63,10 @@
 - 잠긴 GDD와 제작 기록만 근거로 한·영 `WHY.md`, 공개 크레딧과 제작자 일러스트 메타데이터를 작성했다.
 - `laika-base-v1`을 직접 참조한 제작자 일러스트 원본과 640px, 1280px JPEG 파생본을 만들고 해시와 사람 검수 결과를 `ART.md`와 `art/provenance/`에 기록했다.
 - 게임 규칙, 세계, 팔레트, 게임 아트와 사운드는 바꾸지 않았다.
+
+## 아케이드 공개와 지구 평가 / 2026-07-26
+
+- 불변 릴리스 `b7e0aadb45dd02e529094b0ba2c03fd64ad247d2`의 7개 파일, 2,492,111 bytes, JavaScript gzip 92,912 bytes를 기존 Blob과 단일 아케이드에 공개했다.
+- preview, production deployment URL, 운영 주소 `https://laika365.vercel.app/play/stormpost`에서 deployment-only 스모크가 모두 mounted=true, consoleErrors=[], pageErrors=[], failedRequests=[]로 통과했다. 운영 play, entry와 release 표식은 HTTP 200을 반환했다.
+- 2026-07-26 12:08:59 KST, 390×844 운영 화면에서 독립 평가자가 포인터로 약 106초 플레이했다. 출항, 세 번의 드래그·놓기와 한 번의 돌풍을 수행했고 첫 항로 1/3, 점수 0에서 미완주했다.
+- 지구 평가는 절차 날씨와 명확한 시작 안내를 장점으로, 첫 투하 성공·실패와 기체 반응을 읽기 어려운 점을 마찰로 기록했다.
