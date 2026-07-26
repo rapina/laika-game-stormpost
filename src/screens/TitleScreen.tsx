@@ -16,8 +16,12 @@ export default function TitleScreen({ onPlay, onRanking }: Props) {
 
     return (
         <div className="screen title-screen">
+            <div className="storm-cloud cloud-a" />
+            <div className="storm-cloud cloud-b" />
+            <div className="title-airship"><span className="sail" /><span className="hull" /></div>
             <div className="title-logo">
                 <h1>{t('title.name')}</h1>
+                <div className="title-rule"><i /><i /><i /></div>
                 <p className="title-tagline">{t('title.tagline')}</p>
             </div>
             <div className="title-menu">

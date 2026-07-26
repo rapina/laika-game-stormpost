@@ -1,0 +1,273 @@
+{
+  "design": {
+    "w": 390,
+    "h": 844
+  },
+  "arcadeHeaderPx": 68,
+  "locales": [
+    "ko",
+    "en"
+  ],
+  "geometry": [
+    {
+      "viewport": "360x800",
+      "shape": "standalone",
+      "effectiveHeight": 800,
+      "dpr": 3,
+      "bufferW": 1560,
+      "bufferH": 3376,
+      "cssW": 360,
+      "cssH": 779.0625,
+      "canvasWidthOverCssWidth": 4.3333,
+      "canvasHeightOverCssHeight": 4.3334,
+      "requiredRatio": 3,
+      "aspectRatioVsDesign": 1.00002,
+      "errors": [],
+      "checks": {
+        "dprWidthOk": true,
+        "dprHeightOk": true,
+        "uniformAspect": true,
+        "insideFrame": true,
+        "noPageOverflow": true,
+        "noErrors": true
+      },
+      "pass": true
+    },
+    {
+      "viewport": "360x800",
+      "shape": "portal",
+      "effectiveHeight": 732,
+      "dpr": 3,
+      "bufferW": 1560,
+      "bufferH": 3376,
+      "cssW": 338.234375,
+      "cssH": 732,
+      "canvasWidthOverCssWidth": 4.6122,
+      "canvasHeightOverCssHeight": 4.612,
+      "requiredRatio": 3,
+      "aspectRatioVsDesign": 0.99996,
+      "errors": [],
+      "checks": {
+        "dprWidthOk": true,
+        "dprHeightOk": true,
+        "uniformAspect": true,
+        "insideFrame": true,
+        "noPageOverflow": true,
+        "noErrors": true
+      },
+      "pass": true
+    },
+    {
+      "viewport": "390x844",
+      "shape": "standalone",
+      "effectiveHeight": 844,
+      "dpr": 3,
+      "bufferW": 1560,
+      "bufferH": 3376,
+      "cssW": 390,
+      "cssH": 844,
+      "canvasWidthOverCssWidth": 4,
+      "canvasHeightOverCssHeight": 4,
+      "requiredRatio": 3,
+      "aspectRatioVsDesign": 1,
+      "errors": [],
+      "checks": {
+        "dprWidthOk": true,
+        "dprHeightOk": true,
+        "uniformAspect": true,
+        "insideFrame": true,
+        "noPageOverflow": true,
+        "noErrors": true
+      },
+      "pass": true
+    },
+    {
+      "viewport": "390x844",
+      "shape": "portal",
+      "effectiveHeight": 776,
+      "dpr": 3,
+      "bufferW": 1560,
+      "bufferH": 3376,
+      "cssW": 358.578125,
+      "cssH": 776,
+      "canvasWidthOverCssWidth": 4.3505,
+      "canvasHeightOverCssHeight": 4.3505,
+      "requiredRatio": 3,
+      "aspectRatioVsDesign": 1,
+      "errors": [],
+      "checks": {
+        "dprWidthOk": true,
+        "dprHeightOk": true,
+        "uniformAspect": true,
+        "insideFrame": true,
+        "noPageOverflow": true,
+        "noErrors": true
+      },
+      "pass": true
+    },
+    {
+      "viewport": "430x932",
+      "shape": "standalone",
+      "effectiveHeight": 932,
+      "dpr": 3,
+      "bufferW": 1560,
+      "bufferH": 3376,
+      "cssW": 430,
+      "cssH": 930.5625,
+      "canvasWidthOverCssWidth": 3.6279,
+      "canvasHeightOverCssHeight": 3.6279,
+      "requiredRatio": 3,
+      "aspectRatioVsDesign": 1,
+      "errors": [],
+      "checks": {
+        "dprWidthOk": true,
+        "dprHeightOk": true,
+        "uniformAspect": true,
+        "insideFrame": true,
+        "noPageOverflow": true,
+        "noErrors": true
+      },
+      "pass": true
+    },
+    {
+      "viewport": "430x932",
+      "shape": "portal",
+      "effectiveHeight": 864,
+      "dpr": 3,
+      "bufferW": 1560,
+      "bufferH": 3376,
+      "cssW": 399.234375,
+      "cssH": 864,
+      "canvasWidthOverCssWidth": 3.9075,
+      "canvasHeightOverCssHeight": 3.9074,
+      "requiredRatio": 3,
+      "aspectRatioVsDesign": 0.99998,
+      "errors": [],
+      "checks": {
+        "dprWidthOk": true,
+        "dprHeightOk": true,
+        "uniformAspect": true,
+        "insideFrame": true,
+        "noPageOverflow": true,
+        "noErrors": true
+      },
+      "pass": true
+    },
+    {
+      "viewport": "900x760-wide",
+      "shape": "standalone",
+      "effectiveHeight": 760,
+      "dpr": 2,
+      "bufferW": 1170,
+      "bufferH": 2532,
+      "cssW": 351.171875,
+      "cssH": 760,
+      "canvasWidthOverCssWidth": 3.3317,
+      "canvasHeightOverCssHeight": 3.3316,
+      "requiredRatio": 2,
+      "aspectRatioVsDesign": 0.99996,
+      "errors": [],
+      "checks": {
+        "dprWidthOk": true,
+        "dprHeightOk": true,
+        "uniformAspect": true,
+        "insideFrame": true,
+        "noPageOverflow": true,
+        "noErrors": true
+      },
+      "pass": true
+    },
+    {
+      "viewport": "900x760-wide",
+      "shape": "portal",
+      "effectiveHeight": 692,
+      "dpr": 2,
+      "bufferW": 1170,
+      "bufferH": 2532,
+      "cssW": 319.75,
+      "cssH": 692,
+      "canvasWidthOverCssWidth": 3.6591,
+      "canvasHeightOverCssHeight": 3.659,
+      "requiredRatio": 2,
+      "aspectRatioVsDesign": 0.99996,
+      "errors": [],
+      "checks": {
+        "dprWidthOk": true,
+        "dprHeightOk": true,
+        "uniformAspect": true,
+        "insideFrame": true,
+        "noPageOverflow": true,
+        "noErrors": true
+      },
+      "pass": true
+    }
+  ],
+  "gameOver": [
+    {
+      "viewport": "360x800",
+      "shape": "standalone",
+      "locale": "ko",
+      "effectiveHeight": 800,
+      "uiProbe": "present",
+      "offscreenElements": [],
+      "errors": [],
+      "checks": {
+        "reachedGameOver": true,
+        "canvasInsideViewport": true,
+        "gameOverUiInsideViewport": true,
+        "noErrors": true
+      },
+      "pass": true
+    },
+    {
+      "viewport": "360x800",
+      "shape": "standalone",
+      "locale": "en",
+      "effectiveHeight": 800,
+      "uiProbe": "present",
+      "offscreenElements": [],
+      "errors": [],
+      "checks": {
+        "reachedGameOver": true,
+        "canvasInsideViewport": true,
+        "gameOverUiInsideViewport": true,
+        "noErrors": true
+      },
+      "pass": true
+    },
+    {
+      "viewport": "360x800",
+      "shape": "portal",
+      "locale": "ko",
+      "effectiveHeight": 732,
+      "uiProbe": "present",
+      "offscreenElements": [],
+      "errors": [],
+      "checks": {
+        "reachedGameOver": true,
+        "canvasInsideViewport": true,
+        "gameOverUiInsideViewport": true,
+        "noErrors": true
+      },
+      "pass": true
+    },
+    {
+      "viewport": "360x800",
+      "shape": "portal",
+      "locale": "en",
+      "effectiveHeight": 732,
+      "uiProbe": "present",
+      "offscreenElements": [],
+      "errors": [],
+      "checks": {
+        "reachedGameOver": true,
+        "canvasInsideViewport": true,
+        "gameOverUiInsideViewport": true,
+        "noErrors": true
+      },
+      "pass": true
+    }
+  ],
+  "pass": true,
+  "sourceHash": "30ad9ad538f1d9a824f48e213c6b7393e1d977b4f90981c2c07438f91db90e65"
+}

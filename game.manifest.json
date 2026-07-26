@@ -1,37 +1,37 @@
 {
   "schemaVersion": 1,
-  "slug": "gametemplate",
-  "appId": "com.example.gametemplate",
+  "slug": "stormpost",
+  "appId": "com.sputnikworkshop.stormpost",
   "version": "0.0.1",
-  "releaseDate": "TODO-YYYY-MM-DD",
+  "releaseDate": "2026-07-26",
   "title": {
-    "ko": "게임 템플릿",
-    "en": "Game Template"
+    "ko": "폭풍 우편",
+    "en": "Stormpost"
   },
   "tagline": {
-    "ko": "TODO 한 줄 소개",
-    "en": "TODO one line pitch"
+    "ko": "세 봉인을 배달하고 폭풍 관문으로 귀환하세요.",
+    "en": "Deliver three seals and return through the storm gate."
   },
   "description": {
-    "ko": "TODO 규칙과 목표, 실패 조건을 중립 문체로 적는다.",
-    "en": "TODO describe the rules, the goal, and the failure condition in neutral prose."
+    "ko": "비행 우편선을 조종해 색 봉인이 맞는 세 섬에 편지를 투하한다. 번개 구름과 새 떼를 피하고 상승 기류에서 돌풍을 충전한다. 선체가 모두 손상되거나 제한 시간이 끝나기 전에 배달을 마치고 관문으로 귀환해야 한다.",
+    "en": "Pilot an air-mail ship and drop each sealed letter at its matching island. Dodge thunderclouds and birds, and charge gusts in the updraft. Complete every delivery and return through the gate before time or hull runs out."
   },
   "controls": {
     "ko": {
-      "primary": "TODO 주 입력이 무엇을 하는지",
-      "keyboard": "TODO 키보드 대체 입력",
-      "restart": "결과 화면을 눌러 다시 시작한다."
+      "primary": "드래그로 조향하고 손을 떼어 투하한다. 짧은 탭은 저장한 돌풍을 방출한다.",
+      "keyboard": "방향키/WASD 조향, Space 투하, Shift 돌풍, P 일시정지.",
+      "restart": "결과 화면의 다시 출항을 누른다."
     },
     "en": {
-      "primary": "TODO what the primary input does",
-      "keyboard": "TODO keyboard alternative",
-      "restart": "Tap the result screen to start again."
+      "primary": "Drag to steer and release to drop. A short tap releases a stored gust.",
+      "keyboard": "Arrow keys/WASD steer, Space drops, Shift gusts, and P pauses.",
+      "restart": "Choose Depart Again on the result screen."
     }
   },
   "session": {
-    "typicalSeconds": 90,
-    "maxSeconds": 180,
-    "failureBudget": 3
+    "typicalSeconds": 360,
+    "maxSeconds": 540,
+    "failureBudget": 4
   },
   "display": {
     "designWidth": 390,
@@ -41,9 +41,9 @@
   },
   "supportedLocales": ["ko", "en"],
   "media": {
-    "titleKeyImage": "public/art/title-key.jpg",
-    "visualMedium": "TODO 시각 매체",
-    "audio": "synthesized WebAudio only, no audio files",
+    "titleKeyImage": "runtime-canvas",
+    "visualMedium": "procedural layered Canvas 2D illustration",
+    "audio": "procedural WebAudio wind and event synthesis after first input",
     "screenshots": []
   },
   "arcade": {
@@ -61,6 +61,6 @@
     ]
   },
   "source": {
-    "launchpadCommit": "TODO-launchpad-sha"
+    "launchpadCommit": "template-derived"
   }
 }

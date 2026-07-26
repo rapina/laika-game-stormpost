@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { GameResult } from '../game/types'
-import { SampleGame } from '../game/SampleGame'
+import { StormpostGame } from '../game/StormpostGame'
 
 interface Props {
     onGameOver(result: GameResult): void
@@ -22,7 +22,7 @@ export default function GameScreen({ onGameOver, onExit }: Props) {
         const host = hostRef.current
         if (!host) return
 
-        const game = new SampleGame()
+        const game = new StormpostGame()
         game.mount(host, {
             onGameOver: (result) => {
                 if (endedRef.current) return
