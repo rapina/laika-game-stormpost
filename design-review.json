@@ -1,10 +1,10 @@
 {
   "schemaVersion": 3,
   "reviewedAt": "2026-07-26",
-  "sourceHash": "30ad9ad538f1d9a824f48e213c6b7393e1d977b4f90981c2c07438f91db90e65",
+  "sourceHash": "8ea01be19e34a631fba449285167d753e5e3f9cc279928a5b067dba18b6d2c14",
   "verdict": "blocked",
   "method": {
-    "build": "npm run build:arcade (dist-arcade/entry.mjs, release.json releaseSha fbe27b25c63eb36c9086f0121debecc895129f3c)",
+    "build": "fresh npm run build:arcade output (releaseSha 16b46aaa8c2d242057c099d593ca2eae20d95b72), exercised through the arcade portal checks and deployment smoke",
     "viewport": {
       "width": 390,
       "height": 844
@@ -13,102 +13,112 @@
   "designConformance": [
     {
       "id": "contracts-and-flight-input",
-      "designClaim": "출항 전 적·청·황 세 계약을 보여 주고, 포인터 드래그로 조향하며 놓아서 투하하고 180ms 이하 짧은 탭은 돌풍을 우선 사용한다.",
+      "designClaim": "The run starts with three coral, azure, and gold contracts; pointer drag steers, release drops, and a tap shorter than 180 ms spends gust before dropping.",
       "status": "implemented",
-      "observed": "인트로와 HUD가 세 색 계약을 표시한다. 프로덕션 런타임은 pointerdown/move/up을 설계 좌표로 변환해 조향하고, 180ms 미만이면서 이동 10px 이하인 입력을 돌풍으로 분기하며 그 외 release는 투하한다."
+      "observed": "The production runtime initializes the three distinct pending letters, maps a held pointer to the ship target, classifies an unmoved release below 180 ms as releaseGust, and routes longer or moved releases to drop."
     },
     {
-      "id": "delivery-scoring",
-      "designClaim": "같은 색 섬에 42px 이내로 투하하면 성공하고 20px 이내 정밀 보너스, 건조 보너스, ×1.0/×1.5/×2.0 연속 배율을 적용하며 실패 시 배율을 초기화한다.",
-      "status": "implemented",
-      "observed": "런타임은 가장 가까운 미배달 색 계약과 섬을 대응시키고 42px을 성공 경계로 사용한다. 공용 점수 함수가 1,000 기본점, 20px 이내 400점, 마른 편지 250점과 최대 ×2 배율을 계산하며 실패 투하와 충돌이 콤보를 0으로 만든다."
-    },
-    {
-      "id": "hull-wetness-and-gust",
-      "designClaim": "선체는 4칸이고 충돌 시 1칸 감소, 1.2초 무적, 첫 미배달 편지 침수 효과가 있으며 돌풍은 1칸으로 시작해 상승 기류에서 최대 3칸까지 충전하고 위험을 밀어내며 잠시 보호한다.",
-      "status": "implemented",
-      "observed": "선체 4로 시작하며 위험 접촉 시 hull 감소, inv=1.2, 첫 미배달 건조 편지 wet 전환이 실행된다. 중앙 상승 기류 체류 2.5초마다 돌풍을 최대 3까지 충전하고 돌풍은 1을 소모해 130px 내 위험을 밀고 0.7초 보호한다."
-    },
-    {
-      "id": "gate-and-ending",
-      "designClaim": "세 계약 완료 전에는 관문이 잠기고, 모두 배달한 뒤 상단 관문 통과 시 귀환하며 선체 0 또는 제한 시간 종료 시 조난한다. GameResult.phase는 성공 배달 수다.",
-      "status": "implemented",
-      "observed": "세 편지가 모두 delivered일 때만 관문 색과 통과 판정이 열리고 상단 중앙 통과는 성공 종료한다. 360초 또는 hull<=0은 실패 종료하며 onGameOver의 phase는 delivered 개수다."
-    },
-    {
-      "id": "final-score-grade-and-emergency",
-      "designClaim": "남은 시간 초당 8점과 선체 칸당 250점을 더하고 S 5,200+, A 4,200+, B 3,000+, 그 아래 C, 조난 D로 판정한다. 황색 계약은 두 번째 이전 900점, 마지막 500점이다.",
-      "status": "implemented",
-      "observed": "finalScore와 grade가 명시한 시간·선체 보너스 및 등급 경계를 사용한다. 황색 배달 시 이미 배달된 계약이 2개 미만이면 900점, 마지막이면 500점을 더한다."
-    },
-    {
-      "id": "procedural-forward-route",
-      "designClaim": "카메라가 항로를 따라 전진하고, 시드에 따라 섬의 좌우 위치와 구름·새·상승 기류 배치를 만들며 시작점에서 관문까지 안전 통로를 남긴다.",
+      "id": "updraft-recovery-and-charge",
+      "designClaim": "Remaining in an updraft recovers altitude and charges stored gust up to three slots, with one slot available at the start.",
       "status": "missing",
-      "observed": "프로덕션 런타임은 카메라 이동 없이 390×844 한 화면 전체를 고정해서 그린다. 섬은 (88,610), (306,430), (94,250), 상승 기류는 화면 중앙 고정이며 시드는 위험 초기 배치와 비에만 쓰인다. 시드별 섬/상승 기류 배치나 안전 통로 생성·검사가 없다."
+      "observed": "The runtime starts at one gust and increments gust after 2.5 seconds inside the updraft up to three, but the inLift branch does not change ship y, vy, or any altitude resource. No altitude recovery effect is present in the production bundle."
     },
     {
-      "id": "hazard-motion-and-lightning-warning",
-      "designClaim": "위험은 시간에 따라 아래로 흐르고 새 떼는 횡단하며 번개는 경고 섬광 뒤 활성화된다.",
-      "status": "missing",
-      "observed": "새와 구름 모두 x축 속도만 갱신되어 횡단하고 아래쪽 흐름은 없다. 구름의 번개 선은 사인 조건에서 시각적으로 깜박이지만 충돌 판정은 계속 활성 상태여서 경고 단계 뒤 활성화되는 별도 번개 상태가 없다."
-    },
-    {
-      "id": "stamp-cosmetic-progression",
-      "designClaim": "종료 점수 1,000점당 우표 1개를 로컬에 누적하고 4/9/15개에서 선체 장식·돛·돌풍 외형을 순서대로 해금하며 성능은 올리지 않는다.",
-      "status": "missing",
-      "observed": "게임 종료와 결과 처리에서 우표 산정·누적 저장을 하지 않으며 우표 수나 4/9/15 임계치에 따른 외형 선택·렌더링 코드가 없다."
-    },
-    {
-      "id": "keyboard-pause-and-audio-lifecycle",
-      "designClaim": "방향키/WASD, Space, Shift, P, M을 지원하고 문서 비활성화 시 일시정지하며 첫 사용자 입력 전 WebAudio를 시작하지 않는다.",
+      "id": "gust-defense",
+      "designClaim": "A stored gust pushes nearby hazards away and briefly protects the hull.",
       "status": "implemented",
-      "observed": "키 입력은 방향 조향, Space 투하, Shift 돌풍, P 일시정지, M 음소거로 연결된다. visibilitychange가 숨김 상태에서 일시정지하며 AudioContext는 포인터 입력 또는 M 입력의 unlock 전에는 생성되지 않는다."
+      "observed": "releaseGust consumes one slot, grants 0.7 seconds of invulnerability, and displaces hazards within 130 design pixels away from the ship."
     },
     {
-      "id": "bilingual-parity",
-      "designClaim": "한국어와 영어가 같은 규칙과 상태 정보를 제공한다.",
+      "id": "delivery-radius-and-matching",
+      "designClaim": "A release drops the matching undelivered letter at the nearest mailbox; delivery succeeds within 42 px and is precise within 20 px.",
       "status": "implemented",
-      "observed": "게임 런타임의 인트로, 조작 안내, 상태 메시지, 일시정지 및 결과 문구가 ko/en 분기를 갖고 동일한 게임 상태를 사용한다. viewport 검증은 두 언어 결과 UI를 각각 확인했다."
+      "observed": "drop selects the nearest island whose seal letter is still pending, rejects distances above 42, and deliveryScore applies the precision branch at distances of 20 or less."
+    },
+    {
+      "id": "delivery-scoring-and-combo",
+      "designClaim": "A successful delivery scores 1,000, with 400 precision and 250 dry bonuses; consecutive success multipliers progress x1.0, x1.5, x2.0 and a missed drop resets the multiplier.",
+      "status": "implemented",
+      "observed": "deliveryScore composes the specified base bonuses and caps the combo multiplier at x2.0; successful drops increment combo and out-of-radius drops reset it."
+    },
+    {
+      "id": "emergency-contract",
+      "designClaim": "The gold emergency contract adds 500 points when delivered last and 900 points when delivered no later than second.",
+      "status": "implemented",
+      "observed": "Gold delivery adds 900 when fewer than two other letters are delivered and 500 otherwise."
+    },
+    {
+      "id": "collision-state",
+      "designClaim": "An active lightning cloud or bird collision removes one of four hull slots, gives 1.2 seconds of invulnerability, wets the first still-undelivered dry letter, and wet letters lose the 250-point dry bonus.",
+      "status": "implemented",
+      "observed": "The collision path decrements hull, assigns 1.2 seconds of invulnerability, calls wetFirstPending, resets combo, and wet delivery omits the dry bonus."
+    },
+    {
+      "id": "hazard-cycles-and-motion",
+      "designClaim": "Hazards flow downward and recycle after passing the bottom, birds cross the route, and lightning cycles through 1 second warning, 0.65 seconds active damage, then cooldown with damage only while active.",
+      "status": "implemented",
+      "observed": "All hazards advance downward and wrap to y=95; birds also have horizontal velocity and horizontal wrap. lightningPhase returns warning for the first 1 second, active until 1.65 seconds, and cooldown for the rest of its four-second cycle, while collision enables cloud damage only in active."
+    },
+    {
+      "id": "seeded-route-and-safe-corridor",
+      "designClaim": "The seed determines all three island positions, updraft position, and cloud and bird placement; the destinations remain distinct colors and a traversable safe corridor from start to gate is always preserved.",
+      "status": "missing",
+      "observed": "Seeded logic controls island, updraft, cloud, and bird positions and the islands have three distinct seals. However, generateRoute only bounds island and updraft x positions, while nine hazards are placed independently over the route; there is no corridor construction or clearance validation from the start to the gate in source or production behavior."
+    },
+    {
+      "id": "gate-return-and-failure",
+      "designClaim": "The storm gate stays locked until all three contracts are delivered; passing the open top gate returns successfully, while zero hull or the six-minute limit ends in rescue failure.",
+      "status": "implemented",
+      "observed": "canOpenGate requires all three letters delivered, the top-center gate collision finishes with rescued=true only afterward, and elapsed time at 360 seconds or hull at zero finishes with rescued=false."
+    },
+    {
+      "id": "final-score-grade-and-phase",
+      "designClaim": "Final score adds 8 points per whole remaining second and 250 per remaining hull slot; grades are S at 5,200, A at 4,200, B at 3,000, otherwise C, with rescue failure D; GameResult.phase is successful deliveries from 0 to 3.",
+      "status": "implemented",
+      "observed": "finalScore and grade implement the stated formulas and boundaries, finish sends the count of delivered letters as phase, and the result screen displays grade, score, delivered count, and hull."
+    },
+    {
+      "id": "stamp-cosmetics",
+      "designClaim": "Each 1,000 final-score points awards one locally accumulated stamp; cosmetic-only hull, teal sail, and gold gust ring appearances unlock at 4, 9, and 15 stamps, with run-local fallback when storage is unavailable.",
+      "status": "implemented",
+      "observed": "finish adds floor(total/1000), catches storage failure while retaining the in-memory total, and cosmeticTier plus drawShip apply the three visual thresholds without changing gameplay values."
+    },
+    {
+      "id": "keyboard-pause-and-audio",
+      "designClaim": "Arrow keys or WASD steer, Space drops, Shift gusts, P pauses, M mutes, document deactivation auto-pauses, and WebAudio starts only after user input.",
+      "status": "implemented",
+      "observed": "The production runtime binds all specified keys, pauses on visibilitychange when hidden, and calls StormAudio.unlock only from pointerdown or the M key; audio pause, mute, resume, and destroy lifecycle paths are present."
+    },
+    {
+      "id": "bilingual-information",
+      "designClaim": "Korean and English provide the same gameplay rules and state information.",
+      "status": "implemented",
+      "observed": "Both locales expose equivalent title, control, objective, hit, delivery, gate, pause, return/failure, and result information; the viewport run reached both localized result screens without errors or clipped result UI."
+    },
+    {
+      "id": "portrait-canvas",
+      "designClaim": "The game is a 390 by 844 portrait Canvas 2D experience with forward route motion in one screen.",
+      "status": "implemented",
+      "observed": "The arcade portal laid out a 390 by 844 design canvas with uniform letterboxing; the 390 by 844 standalone and portal checks passed with correct aspect, DPR backing store, no overflow, and no console or page errors. Moving cloud layers and downward weather/hazards provide route motion."
     }
   ],
   "creatorTests": [
     {
       "command": "npm test",
-      "covers": "배달 반경과 점수, 침수 순서, 관문 잠금, 최종 보너스·등급, 로직 RNG, 기록 및 번역 키 검증",
-      "status": "pass"
-    },
-    {
-      "command": "npm run build",
-      "covers": "TypeScript 검사와 standalone 프로덕션 Vite 번들",
-      "status": "pass"
-    },
-    {
-      "command": "npm run build:arcade",
-      "covers": "Arcade 프로덕션 번들, 불변 릴리스 생성과 파일 해시 검증",
-      "status": "pass"
-    },
-    {
-      "command": "npm run smoke -- 17 90000",
-      "covers": "현재 deployment-only 스모크의 Arcade 런타임 마운트와 콘솔·페이지 오류 부재",
-      "status": "pass"
-    },
-    {
-      "command": "npm run viewport",
-      "covers": "360×800, 390×844, 430×932, 900×760 standalone/portal의 레터박스·DPR·넘침·오류와 ko/en 결과 UI",
+      "covers": "Delivery radius and scoring, wet-letter order, gate lock, return scoring and grade boundaries, seeded route, lightning phases, stamp rewards and cosmetic thresholds, seeded RNG, records, and bilingual shell translation completeness.",
       "status": "pass"
     }
   ],
   "deployable": {
     "status": "pass",
-    "observed": "standalone 및 Arcade 빌드가 성공했다. Arcade release.json은 entry.mjs, CSS와 필수 Galmuri 글꼴 3개를 포함한 5개 파일(1,615,455 bytes)을 해시 검증했다. 390×844 standalone/portal은 균일 레터박스, 충분한 DPR backing store, 화면 내부 배치, 페이지 넘침 없음과 오류 0으로 통과했고 sourceHash는 smoke-result.json과 일치한다."
+    "observed": "Fresh npm run build and npm run build:arcade succeeded. The immutable arcade release verified all five required files and hashes (1,617,121 bytes; 92,423-byte JS gzip). CSP and missing-asset checks passed, 390x844 standalone and portal viewport checks passed, and deployment smoke mounted with zero console or page errors. sourceHash matched smoke-result.json."
   },
   "notes": [
-    "빌드와 제작자 테스트는 모두 통과했지만 최종 GDD의 절차 항로, 위험 흐름/번개 활성 단계, 우표 외형 진행 약속이 실제 프로덕션 빌드에 없어 출고를 차단한다.",
-    "DAY.md에 기록된 과거 상호작용·완주 스모크와 달리 현재 npm run smoke는 잠금 커밋의 deployment-only 정책으로 마운트와 치명 오류만 재검증한다. 이는 본 판정의 누락 근거가 아니라 실행한 현재 명령의 관찰 범위 기록이다."
+    "The verdict is blocked solely for concrete final-GDD conformance gaps: updraft altitude recovery and guaranteed safe-corridor generation. Build health and deployability passed.",
+    "Dependency audit severity and unverified device feel were not used as design-conformance criteria."
   ],
   "summary": {
-    "ko": "배달·점수·피해·돌풍·관문·종료·입력·양언어 약속과 배포 가능성은 확인했지만, 시드 기반 전진 항로, 아래로 흐르는 위험과 경고 후 활성 번개, 로컬 우표 및 4/9/15 외형 해금이 구현되지 않아 출고를 차단합니다.",
-    "en": "Delivery, scoring, damage, gust, gate, ending, input, bilingual parity, and deployability are present, but release is blocked because the seeded forward route, downward-moving hazards with warning-then-active lightning, and local stamp progression with 4/9/15 cosmetic unlocks are not implemented."
+    "ko": "제작자 테스트와 빌드·아케이드 배포 검증은 통과했지만, 상승 기류의 고도 회복과 시작점부터 관문까지의 안전 통로 보장이 구현되지 않아 출고를 막는다.",
+    "en": "Creator tests, builds, and arcade deployability checks pass, but release is blocked because updraft altitude recovery and a guaranteed safe corridor from start to gate are not implemented."
   }
 }
